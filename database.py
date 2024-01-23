@@ -1,10 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
-import os
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from gorra import Gorra, Base
+import os
 
 load_dotenv()
 usuario = os.environ.get("MYSQLDB_USUARIO")
