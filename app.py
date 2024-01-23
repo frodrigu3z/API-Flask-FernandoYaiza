@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional
 from database import obtener_bd
@@ -35,7 +35,7 @@ def leer_gorras(db: Session = Depends(obtener_bd)):
 # Ruta para crear una nueva gorra
 @app.post("/gorra")
 def crear_gorra(gorra: GorraModelo, db: Session = Depends(obtener_bd)):
-    nueva_gorra = Gorra(**gorra.dict())
+    nueva_gorra = Gorra(**gorra.model_dump())
     db.add(nueva_gorra)
     db.commit()
     return {"gorra": gorra_a_diccionario(nueva_gorra)}
@@ -60,14 +60,12 @@ def eliminar_gorra(id: int, db: Session = Depends(obtener_bd)):
 
 # Ruta para actualizar una gorra por su id
 @app.put("/gorra/{id}")
-def actualizar_gorra(id: int, gorra: GorraModelo, imagen: UploadFile = File(None), db: Session = Depends(obtener_bd)):
+def actualizar_gorra(id: int, gorra: GorraModelo, db: Session = Depends(obtener_bd)):
     gorra_existente = db.query(Gorra).filter(Gorra.id == id).first()
     if gorra_existente is None:
         raise HTTPException(status_code=404, detail="Gorra no encontrada")
-    for clave, valor in gorra.dict().items():
+    for clave, valor in gorra.model_dump().items():
         if valor is not None:
             setattr(gorra_existente, clave, valor)
-    if imagen:
-        gorra_existente.imagen = imagen.file.read()
     db.commit()
     return {"gorra": gorra_a_diccionario(gorra_existente)}
